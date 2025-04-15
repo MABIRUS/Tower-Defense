@@ -4,7 +4,7 @@
   {
     float Health { get; }
 
-    public void TakeDamage(float damage);
+    void TakeDamage(float damage);
     void Die();
   }
 }

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Enemies.Parts
 {
-  public class Enemy : MonoBehaviour, IAttackable, IMoveable, IDestroyable
+  public class Enemy : MonoBehaviour, IAttackable, IMoveable, IDestroyable, IPooledObject
   {
     [SerializeField] private float health;
     [SerializeField] private float armor;
@@ -20,8 +20,17 @@ namespace Assets.Scripts.Enemies.Parts
 
     private EnemyState enemyState = EnemyState.Idle;
     private float lastAttackTime = 0f;
+    private static Vector2 playerBasePosition;
+    private static PlayerBase playerBase;
+    private IPoolOwner poolOwner;
 
     private readonly List<(IEffect effect, float endTime)> activeEffects = new();
+
+    private void Start()
+    {
+      playerBase = LevelManager.main.playerBase;
+      playerBasePosition = playerBase.transform.position;
+    }
 
     private void Update()
     {
@@ -43,10 +52,8 @@ namespace Assets.Scripts.Enemies.Parts
 
     private void FixedUpdate()
     {
-      // Получаем позицию базы игрока из LevelManager
-      Vector2 playerBasePosition = LevelManager.main.playerBase.GetComponentInParent<Transform>().position;
       // Вычисляем расстояние до базы, используя текущее положение объекта
-      float distanceToBase = Vector2.Distance(transform.position, playerBasePosition);
+      var distanceToBase = Vector2.Distance(transform.position, playerBasePosition);
 
       if (distanceToBase <= attackRange)
       {
@@ -64,7 +71,6 @@ namespace Assets.Scripts.Enemies.Parts
       }
     }
 
-
     public float Health => health;
     public float Armor => armor;
     public float Speed => speed;
@@ -74,9 +80,9 @@ namespace Assets.Scripts.Enemies.Parts
     public EnemyType EnemyType => enemyType;
     public EnemyState EnemyState => enemyState;
 
-    public void Attack()
+    public void Attack(Collider2D target = null)
     {
-      LevelManager.main.playerBase.TakeDamage(Damage);
+      playerBase.TakeDamage(Damage);
     }
     public void Die()
     {
@@ -116,5 +122,25 @@ namespace Assets.Scripts.Enemies.Parts
     public void ModifyDamage(float multiplier) => damage *= multiplier;
     public void ModifyAttackSpeed(float multiplier) => attackSpeed *= multiplier;
     public void SetEnemyType(EnemyType type) => enemyType = type;
+
+    public void Init(IPoolOwner poolOwner)
+    {
+      this.poolOwner = poolOwner;
+    }
+
+    public void OnSpawn()
+    {
+      gameObject.SetActive(true);
+    }
+
+    public void OnReturnedToPool()
+    {
+      gameObject.SetActive(false);
+
+      if (poolOwner is MonoBehaviour mb)
+      {
+        transform.position = mb.transform.position;
+      }
+    }
   }
 }
