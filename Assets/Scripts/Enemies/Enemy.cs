@@ -10,13 +10,16 @@ namespace Assets.Scripts.Enemies.Parts
 {
   public class Enemy : MonoBehaviour, IAttackable, IMoveable, IDestroyable, IPooledObject
   {
-    [SerializeField] private float health;
-    [SerializeField] private float armor;
-    [SerializeField] private float speed;
-    [SerializeField] private float attackRange;
-    [SerializeField] private float attackSpeed;
-    [SerializeField] private float damage;
-    [SerializeField] private EnemyType enemyType;
+    [SerializeField] private EnemySO enemyScriptableObject;
+
+    private float currentHealth;
+    private float currentArmor;
+    private float currentSpeed;
+    private float currentAttackSpeed;
+    private float currentDamage;
+
+    private float attackRange;
+    private EnemyType enemyType;
 
     private EnemyState enemyState = EnemyState.Idle;
     private float lastAttackTime = 0f;
@@ -30,6 +33,13 @@ namespace Assets.Scripts.Enemies.Parts
     {
       playerBase = LevelManager.main.playerBase;
       playerBasePosition = playerBase.transform.position;
+      currentHealth = enemyScriptableObject.health;
+      currentArmor = enemyScriptableObject.armor;
+      currentSpeed = enemyScriptableObject.speed;
+      currentAttackSpeed = enemyScriptableObject.attackSpeed;
+      currentDamage = enemyScriptableObject.damage;
+      attackRange = enemyScriptableObject.attackRange;
+      enemyType = enemyScriptableObject.enemyType;
     }
 
     private void Update()
@@ -58,7 +68,7 @@ namespace Assets.Scripts.Enemies.Parts
       if (distanceToBase <= attackRange)
       {
         // Если база в зоне атаки и прошло достаточно времени с предыдущей атаки
-        if (Time.time - lastAttackTime >= 1f / attackSpeed)
+        if (Time.time - lastAttackTime >= 1f / currentAttackSpeed)
         {
           Attack();
           lastAttackTime = Time.time;
@@ -71,12 +81,12 @@ namespace Assets.Scripts.Enemies.Parts
       }
     }
 
-    public float Health => health;
-    public float Armor => armor;
-    public float Speed => speed;
+    public float Health => currentHealth;
+    public float Armor => currentArmor;
+    public float Speed => currentSpeed;
     public float AttackRange => attackRange;
-    public float AttackSpeed => attackSpeed;
-    public float Damage => damage;
+    public float AttackSpeed => currentAttackSpeed;
+    public float Damage => currentDamage;
     public EnemyType EnemyType => enemyType;
     public EnemyState EnemyState => enemyState;
 
@@ -86,13 +96,13 @@ namespace Assets.Scripts.Enemies.Parts
     }
     public void Die()
     {
-      speed = 0;
-      Destroy(gameObject);
+      //ToDo: Поигрывается анимация смерти и дает деньги
+      OnReturnedToPool();
     }
 
     public void Move(Vector2 targetPosition)
     {
-      transform.position = Vector2.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+      transform.position = Vector2.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
     }
 
     public void ApplyEffect(IEffect effect)
@@ -109,23 +119,29 @@ namespace Assets.Scripts.Enemies.Parts
 
     public void TakeDamage(float damage)
     {
-      health -= damage;
-      if (health <= 0)
+      currentHealth -= damage;
+      if (currentHealth <= 0)
       {
         Die();
       }
     }
 
     public void SetState(EnemyState state) => enemyState = state;
-    public void ModifyArmor(float multiplier) => armor *= multiplier;
-    public void ModifySpeed(float multiplier) => speed *= multiplier;
-    public void ModifyDamage(float multiplier) => damage *= multiplier;
-    public void ModifyAttackSpeed(float multiplier) => attackSpeed *= multiplier;
-    public void SetEnemyType(EnemyType type) => enemyType = type;
+    public void ModifyArmor(float multiplier) => currentArmor *= multiplier;
+    public void ModifySpeed(float multiplier) => currentSpeed *= multiplier;
+    public void ModifyDamage(float multiplier) => currentDamage *= multiplier;
+    public void ModifyAttackSpeed(float multiplier) => currentAttackSpeed *= multiplier;
 
     public void Init(IPoolOwner poolOwner)
     {
       this.poolOwner = poolOwner;
+      activeEffects.Clear();
+
+      currentHealth = enemyScriptableObject.health;
+      currentArmor = enemyScriptableObject.armor;
+      currentSpeed = enemyScriptableObject.speed;
+      currentAttackSpeed = enemyScriptableObject.attackSpeed;
+      currentDamage = enemyScriptableObject.damage;
     }
 
     public void OnSpawn()

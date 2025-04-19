@@ -1,46 +1,102 @@
+using System.Collections.Generic;
 using Assets.Scripts.Enemies.Interfaсes;
-using Assets.Scripts.Enemies.Parts;
+using Assets.Scripts.Interfaсes;
+using Assets.Scripts.Towers.Parts;
 using UnityEngine;
 
-public class Tower : MonoBehaviour, IAttackable
+[RequireComponent(typeof(CircleCollider2D))]
+public class Tower : MonoBehaviour, IAttackable, IPoolOwner
 {
-  [SerializeField] private float attackRange;
-  [SerializeField] private float attackSpeed;
-  [SerializeField] private float damage;
+  [SerializeField] private TowerSO towerScriptableObject;
 
+  private float currentAttackRange;
+  private float currentAttackSpeed;
+  private float currentDamage;
+
+  [Header("Projectile Pool")]
+  [Tooltip("Prefab пули, должен содержать компонент Bullet")]
+  [SerializeField] private GameObject bulletPrefab;
+  [Tooltip("Размер пула пуль")]
+  [SerializeField] private int poolSize = 5;
+
+  private Queue<Bullet> bulletPool;
   private CircleCollider2D attackRangeCollider;
+  private float lastAttackTime;
 
   private void Start()
   {
-    attackRangeCollider = this.GetComponent<CircleCollider2D>();
+    // Загружаем параметры из ScriptableObject
+    currentAttackRange = towerScriptableObject.attackRange;
+    currentAttackSpeed = towerScriptableObject.attackSpeed;
+    currentDamage = towerScriptableObject.damage;
+
+    // Настраиваем триггер-коллайдер для обнаружения врагов
+    attackRangeCollider = GetComponent<CircleCollider2D>();
+    attackRangeCollider.radius = currentAttackRange;
+
+    // Инициализация пула
+    bulletPool = new Queue<Bullet>(poolSize);
+    for (int i = 0; i < poolSize; i++)
+    {
+      var obj = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+      obj.SetActive(false);
+
+      if (obj.TryGetComponent<Bullet>(out var bullet))
+      {
+        bullet.Init(this);
+        bulletPool.Enqueue(bullet);
+      }
+      else
+      {
+        Debug.LogError("Bullet Prefab не содержит компонент Bullet!");
+        Destroy(obj);
+      }
+    }
   }
 
-  public float AttackRange => attackRange;
-
-  public float AttackSpeed => attackSpeed;
-
-  public float Damage => damage;
+  public float AttackRange => currentAttackRange;
+  public float AttackSpeed => currentAttackSpeed;
+  public float Damage => currentDamage;
 
   private void OnTriggerEnter2D(Collider2D collision)
   {
-    if (collision.gameObject.CompareTag("Enemy"))
-    {
+    if (collision.CompareTag("Enemy"))
       Attack(collision);
-    }
+  }
 
+  private void OnTriggerStay2D(Collider2D collision)
+  {
+    if (collision.CompareTag("Enemy"))
+      Attack(collision);
   }
 
   public void Attack(Collider2D target = null)
   {
-    Debug.Log("Tower Attack");
-    if (target != null)
-    {
-      // Пытаемся получить компонент Enemy с игрового объекта
-      var enemy = target.GetComponent<Enemy>();
-      if (enemy != null)
-      {
-        enemy.TakeDamage(Damage);
-      }
-    }
+    if (target == null)
+      return;
+
+    // Проверяем задержку между выстрелами
+    if (Time.time - lastAttackTime < 1f / currentAttackSpeed)
+      return;
+
+    // Берём пулю из пула, если есть свободная
+    if (bulletPool.Count == 0)
+      return;
+
+    lastAttackTime = Time.time;
+
+    var bullet = bulletPool.Dequeue();
+    // Задаём параметры пули: цель, урон и скорость полёта
+    bullet.SetParameters(target.transform, currentDamage);
+    // Ставим пулю в позицию башни и активируем
+    bullet.transform.position = transform.position;
+    bullet.OnSpawn();
+  }
+
+  // Вызывается пулей при попадании или потере цели
+  public void ReturnToPool(IPooledObject obj)
+  {
+    obj.OnReturnedToPool();
+    bulletPool.Enqueue(obj as Bullet);
   }
 }
