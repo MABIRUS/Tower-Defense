@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fccf8360bb0477d439bc82a2a255c4a3, type: 3}
   m_Name: Turret
   m_EditorClassIdentifier: 
-  attackRange: 1.5
+  attackRange: 6
   attackSpeed: 1
   damage: 75
   maxTargets: 1

@@ -17,6 +17,7 @@ namespace Assets.Scripts.Enemies.Parts
     private float currentSpeed;
     private float currentAttackSpeed;
     private float currentDamage;
+    private float currentReward;
 
     private float attackRange;
     private EnemyType enemyType;
@@ -39,6 +40,7 @@ namespace Assets.Scripts.Enemies.Parts
       currentAttackSpeed = enemyScriptableObject.attackSpeed;
       currentDamage = enemyScriptableObject.damage;
       attackRange = enemyScriptableObject.attackRange;
+      currentReward = enemyScriptableObject.reward;
       enemyType = enemyScriptableObject.enemyType;
     }
 
@@ -97,6 +99,7 @@ namespace Assets.Scripts.Enemies.Parts
     public void Die()
     {
       //ToDo: Поигрывается анимация смерти и дает деньги
+      playerBase.ChangeMoney(currentReward);
       OnReturnedToPool();
     }
 

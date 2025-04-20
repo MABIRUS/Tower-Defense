@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6087831015985507795}
   - component: {fileID: 4568341258220324340}
   - component: {fileID: 2495277165689664942}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Tower
   m_TagString: Tower
   m_Icon: {fileID: 0}
@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.17, y: -0.09, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -79,8 +79,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.2999999, g: 0.5175031, b: 1, a: 1}
+  m_Sprite: {fileID: 2323917800338813707, guid: 6b9506d7b1314c647a2f73bcf4d46a6e, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -125,7 +125,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
+  m_Radius: 2.5599997
 --- !u!50 &4568341258220324340
 Rigidbody2D:
   serializedVersion: 5

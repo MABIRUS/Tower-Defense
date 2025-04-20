@@ -5,10 +5,13 @@ using UnityEngine;
 public class PlayerBase : MonoBehaviour, IDestroyable
 {
 
-  [SerializeField] private float health;
+  [SerializeField] private float money;
+  private float health = 100;
 
   public event Action<float> OnHealthChanged;
+  public event Action<float> OnMoneyChanged;
 
+  public float Money => money;
   public float Health => health;
 
   public void TakeDamage(float damage)
@@ -23,10 +26,15 @@ public class PlayerBase : MonoBehaviour, IDestroyable
     }
   }
 
+  public void ChangeMoney(float delta)
+  {
+    money += delta;
+    OnMoneyChanged?.Invoke(money);
+  }
+
   public void Die()
   {
     Debug.Log("Base Destoryer");
     Destroy(gameObject);
   }
-
 }
