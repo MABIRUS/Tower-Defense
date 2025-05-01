@@ -1,56 +1,50 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer), typeof(Collider2D))]
 public class TowerPreview : MonoBehaviour
 {
-  [Tooltip("Слои, в которых любые коллайдеры блокируют постройку")]
-  public LayerMask blockingLayers;
+  [Tooltip("Слой Platforms")]
+  public LayerMask platformLayer;
 
-  private SpriteRenderer spriteRenderer;
-  private Collider2D coll;
+  private SpriteRenderer sr;
+  public bool CanPlace { get; private set; }
 
-  private bool canPlace = true;
-  private int overlapCount = 0;
-
-  // Из BuildingManager смотрит, можно ли строить
-  public bool CanPlace => canPlace;
-
-  private void Awake()
+  void Awake()
   {
-    spriteRenderer = GetComponent<SpriteRenderer>();
-    coll = GetComponent<Collider2D>();
-    coll.isTrigger = true;
+    sr = GetComponent<SpriteRenderer>();
+    var rb = GetComponent<Rigidbody2D>();
+    rb.bodyType = RigidbodyType2D.Kinematic;
+    rb.gravityScale = 0;
+    var col = GetComponent<Collider2D>();
+    col.isTrigger = true;
+
+    CanPlace = false;
     UpdateColor();
   }
 
-  private void OnTriggerEnter2D(Collider2D other)
+  void OnTriggerEnter2D(Collider2D other)
   {
-    if (((1 << other.gameObject.layer) & blockingLayers) != 0)
+    if (((1 << other.gameObject.layer) & platformLayer) != 0)
     {
-      overlapCount++;
-      canPlace = false;
+      var plat = other.GetComponent<Platform>();
+      CanPlace = plat != null && !plat.HasTower;
       UpdateColor();
     }
   }
 
-  private void OnTriggerExit2D(Collider2D other)
+  void OnTriggerExit2D(Collider2D other)
   {
-    if (((1 << other.gameObject.layer) & blockingLayers) != 0)
+    if (((1 << other.gameObject.layer) & platformLayer) != 0)
     {
-      overlapCount--;
-      if (overlapCount <= 0)
-      {
-        overlapCount = 0;
-        canPlace = true;
-        UpdateColor();
-      }
+      CanPlace = false;
+      UpdateColor();
     }
   }
 
-  private void UpdateColor()
+  void UpdateColor()
   {
-    // зелёный полупрозрачный или красный полупрозрачный
-    spriteRenderer.color = canPlace
+    sr.color = CanPlace
         ? new Color(0f, 1f, 0f, 0.5f)
         : new Color(1f, 0f, 0f, 0.5f);
   }

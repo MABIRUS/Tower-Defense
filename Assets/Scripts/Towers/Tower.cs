@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.Enemies.Interfaсes;
 using Assets.Scripts.Interfaсes;
@@ -22,6 +23,36 @@ public class Tower : MonoBehaviour, IAttackable, IPoolOwner
   private Queue<Bullet> bulletPool;
   private CircleCollider2D attackRangeCollider;
   private float lastAttackTime;
+
+  // Эта платформа, на которой сейчас стоит башня
+  public Platform CurrentPlatform { get; set; }
+  // Блокировка стрельбы во время перемещения
+  public bool IsMoving { get; private set; }
+
+  public void StartMove(Platform target, float speed)
+  {
+    if (IsMoving) return;
+    IsMoving = true;
+
+    // Занимаем новую платформу, освобождаем старую
+    if (CurrentPlatform != null) CurrentPlatform.OccupiedTower = null;
+    target.OccupiedTower = this;
+    CurrentPlatform = target;
+
+    StartCoroutine(MoveRoutine(target.transform.position, speed));
+  }
+
+  private IEnumerator MoveRoutine(Vector3 dest, float speed)
+  {
+    while ((transform.position - dest).sqrMagnitude > 0.0001f)
+    {
+      transform.position = Vector3.MoveTowards(transform.position, dest, speed * Time.deltaTime);
+      yield return null;
+    }
+    transform.position = dest;
+    IsMoving = false;
+  }
+
 
   private void Start()
   {
@@ -72,11 +103,13 @@ public class Tower : MonoBehaviour, IAttackable, IPoolOwner
 
   public void Attack(Collider2D target = null)
   {
+    if (IsMoving) return;
+
     if (target == null)
       return;
 
     // Проверяем задержку между выстрелами
-    if (Time.time - lastAttackTime < 1f / currentAttackSpeed)
+    if (Time.time - lastAttackTime < 1f / currentAttackSpeed) 
       return;
 
     // Берём пулю из пула, если есть свободная

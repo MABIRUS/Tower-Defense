@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbdbd696730d779449014c4c4e168cee, type: 3}
-  m_Name: ShopItemTurret
+  m_Name: RailItem
   m_EditorClassIdentifier: 
-  itemName: Turret
-  towerPrefab: {fileID: 3016844173472252091, guid: d44136b05af162e43b2b19ae0f167fd6, type: 3}
-  previewPrefab: {fileID: 3016844173472252091, guid: 13adca2ae35a7e14db12885dafa7f64d, type: 3}
-  price: 35
+  price: 5
+  buildType: 2
+  icon: {fileID: -145362552210212360, guid: 9abbfca17a2be9a4fa18a44f57865d68, type: 3}
+  buildPrefab: {fileID: 1177064006978904059, guid: 363b6aed271ff6544954ae0aa20dd653, type: 3}
+  previewPrefab: {fileID: 1177064006978904059, guid: e09f923f9123dc64f85486801198f483, type: 3}

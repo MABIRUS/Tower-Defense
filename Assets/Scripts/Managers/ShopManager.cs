@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets.Scripts.Managers.Parts;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,130 +8,50 @@ namespace Assets.Scripts.Managers
 {
   public class ShopManager : MonoBehaviour
   {
-    [Header("References")]
     public PlayerBase playerBase;
-
-    [Header("Shop Configuration")]
-    [Tooltip("Список товаров магазина")]
     public List<ShopItemSO> shopItems;
-
-    [Header("UI Prefabs & Container")]
-    [Tooltip("Prefab кнопки магазина с компонентом Button и текстом")]
     public GameObject shopButtonPrefab;
-    [Tooltip("Контейнер для кнопок (UI Panel) в Canvas")]
     public Transform buttonContainer;
 
-    // Вспомогательная структура для хранения кнопок и данных
-    private struct ShopButtonInfo
+    List<ShopItemInfo> infos = new List<ShopItemInfo>();
+    Camera cam;
+
+    void Start()
     {
-      public ShopItemSO item;
-      public Button button;
-      public TMP_Text costText;
-    }
+      cam = Camera.main;
 
-    private List<ShopButtonInfo> buttonInfos = new List<ShopButtonInfo>();
-    private Camera mainCam;
-    private GameObject previewInstance;
-    private TowerPreview previewScript;
-    private ShopItemSO selectedItem;
-
-    private void Start()
-    {
-      mainCam = Camera.main;
-
-      // Генерация кнопок магазина
       foreach (var item in shopItems)
       {
-        // 1) Создаём саму кнопку
-        var btnObj = Instantiate(shopButtonPrefab, buttonContainer);
-        var btn = btnObj.GetComponent<Button>();
+        var go = Instantiate(shopButtonPrefab, buttonContainer);
+        var btn = go.GetComponent<Button>();
+        var txt = go.GetComponentInChildren<TMP_Text>();
+        var icon = go.transform.Find("Icon")?.GetComponent<Image>();
 
-        // 2) Иконка башни
-        // Предполагаем, что в shopButtonPrefab есть дочерний объект "Icon" с Image
-        var iconImg = btnObj.transform.Find("Icon")?.GetComponent<Image>();
-        if (iconImg != null)
-        {
-          // Берём спрайт из префаба башни
-          var towerSprite = item.towerPrefab.GetComponentInChildren<SpriteRenderer>()?.sprite;
-          if (towerSprite != null)
-            iconImg.sprite = towerSprite;
-        }
+        // Устанавливаем иконку из ShopItemSO
+        if (icon != null && item.icon != null)
+          icon.sprite = item.icon;
 
-        // 3) Текст цены
-        var txt = btnObj.GetComponentInChildren<TMP_Text>();
+        // Текст цены
         if (txt != null)
           txt.text = $"{item.price}";
 
-        // 4) Подписка на клик
-        btn.onClick.AddListener(() => BeginPlacement(item));
+        btn.onClick.AddListener(() => BuildingManager.Instance.BeginPlacement(item));
 
-        // 5) Сохраняем инфу для блокировки
-        buttonInfos.Add(new ShopButtonInfo
-        {
-          item = item,
-          button = btn,
-          costText = txt,
-        });
+        infos.Add(new ShopItemInfo { item = item, btn = btn, txt = txt });
       }
 
-      // Подписка на изменение денег и первоначальная проверка
-      playerBase.OnMoneyChanged += OnMoneyChanged;
-      OnMoneyChanged(playerBase.Money);
+      playerBase.OnMoneyChanged += UpdateButtons;
+      UpdateButtons(playerBase.Money);
     }
 
-
-    // Обновление доступности кнопок по деньгам
-    private void OnMoneyChanged(float newMoney)
+    void UpdateButtons(float money)
     {
-      foreach (var info in buttonInfos)
+      foreach (var f in infos)
       {
-        bool affordable = newMoney >= info.item.price;
-        info.button.interactable = affordable;
-        if (info.costText != null)
-          info.costText.color = affordable ? Color.white : Color.red;
+        bool ok = money >= f.item.price;
+        f.btn.interactable = ok;
+        f.txt.color = ok ? Color.white : Color.red;
       }
-    }
-
-    private void Update()
-    {
-      if (previewInstance == null)
-        return;
-
-      Vector2 worldPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
-      previewInstance.transform.position = worldPos;
-
-      if (Input.GetMouseButtonDown(0))
-      {
-        if (previewScript.CanPlace && playerBase.Money >= selectedItem.price)
-        {
-          playerBase.ChangeMoney(-selectedItem.price);
-          Instantiate(selectedItem.towerPrefab, worldPos, Quaternion.identity);
-        }
-        EndPlacement();
-      }
-
-      if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
-        EndPlacement();
-    }
-
-    private void BeginPlacement(ShopItemSO item)
-    {
-      if (previewInstance != null)
-        Destroy(previewInstance);
-
-      selectedItem = item;
-      previewInstance = Instantiate(item.previewPrefab);
-      previewScript = previewInstance.GetComponent<TowerPreview>();
-    }
-
-    private void EndPlacement()
-    {
-      if (previewInstance != null)
-        Destroy(previewInstance);
-
-      previewInstance = null;
-      previewScript = null;
-      selectedItem = null;
     }
   }
 }
