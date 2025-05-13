@@ -1,36 +1,39 @@
-using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEngine;
 
 public class TowerMovementManager : MonoBehaviour
 {
+  public static TowerMovementManager Instance { get; private set; }
+
   public float moveSpeed = 3f;
   public LayerMask platformLayer;
   public float snapDistance = 1f;
 
   private Tower selectedTower;
-  private List<Platform> availableTargets = new List<Platform>();
+  private List<Platform> availableTargets = new ();
+
+  private void Awake() => Instance = this;
 
   void Update()
   {
-    Vector2 wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
     if (selectedTower == null && Input.GetMouseButtonDown(0))
     {
-      var hit = Physics2D.Raycast(wp, Vector2.zero);
-      if (hit.collider != null && hit.collider.TryGetComponent<Tower>(out var t) && !t.IsMoving)
+      var hit = Physics2D.Raycast(worldPoint, Vector2.zero);
+      if (hit.collider != null && hit.collider.TryGetComponent<Tower>(out var tower) && !tower.IsMoving)
       {
-        selectedTower = t;
+        selectedTower = tower;
         ShowAvailablePlatforms();
       }
     }
     else if (selectedTower != null && Input.GetMouseButtonDown(0))
     {
-      var hit = Physics2D.Raycast(wp, Vector2.zero);
-      if (hit.collider != null && hit.collider.TryGetComponent<Platform>(out var p)
-          && availableTargets.Contains(p))
+      var hit = Physics2D.Raycast(worldPoint, Vector2.zero);
+      if (hit.collider != null && hit.collider.TryGetComponent<Platform>(out var platform)
+          && availableTargets.Contains(platform))
       {
-        selectedTower.StartMove(p, moveSpeed);
+        selectedTower.StartMove(platform, moveSpeed);
       }
       ClearSelection();
     }
@@ -42,12 +45,12 @@ public class TowerMovementManager : MonoBehaviour
 
   private void ShowAvailablePlatforms()
   {
-    var curPlat = selectedTower.CurrentPlatform;
-    if (curPlat == null) return;
+    var currentPlat = selectedTower.CurrentPlatform;
+    if (currentPlat == null) return;
 
-    foreach (var rail in curPlat.connectedRails)
+    foreach (var rail in currentPlat.connectedRails)
     {
-      var other = rail.A == curPlat ? rail.B : rail.A;
+      var other = rail.firstPlatform == currentPlat ? rail.secondPlatform : rail.firstPlatform;
       if (!other.HasTower)
       {
         availableTargets.Add(other);

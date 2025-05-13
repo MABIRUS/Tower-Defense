@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   price: 35
   buildType: 0
-  icon: {fileID: 2323917800338813707, guid: 6b9506d7b1314c647a2f73bcf4d46a6e, type: 3}
+  icon: {fileID: 2183332059371856055, guid: 3948b314b385b954a8bb6eeab54255fd, type: 3}
   buildPrefab: {fileID: 3016844173472252091, guid: d44136b05af162e43b2b19ae0f167fd6, type: 3}
   previewPrefab: {fileID: 3016844173472252091, guid: 13adca2ae35a7e14db12885dafa7f64d, type: 3}

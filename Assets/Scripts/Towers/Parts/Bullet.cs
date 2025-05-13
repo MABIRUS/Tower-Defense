@@ -1,31 +1,18 @@
-﻿using Assets.Scripts.Enemies.Interfaсes;
-using Assets.Scripts.Enemies.Parts;
-using Assets.Scripts.Interfaсes;
+﻿using Assets.Scripts.Enemies.Parts;
 using UnityEngine;
 
 namespace Assets.Scripts.Towers.Parts
 {
-  public class Bullet : MonoBehaviour, IPooledObject
+  public class Bullet : MonoBehaviour
   {
-    private Tower poolOwner;
     private Transform target;
     private float damage;
-    private float speed = 20;
-
-    public void Init(IPoolOwner poolOwner)
-    {
-      this.poolOwner = poolOwner as Tower;
-    }
+    private readonly float speed = 15;
 
     public void OnReturnedToPool()
     {
       target = null;
       gameObject.SetActive(false);
-    }
-
-    public void OnSpawn()
-    {
-      gameObject.SetActive(true);
     }
 
     public void SetParameters(Transform target, float damage)
@@ -34,40 +21,27 @@ namespace Assets.Scripts.Towers.Parts
       this.damage = damage;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-      if (target == null)
+      if (target == null || !target.gameObject.activeInHierarchy)
       {
-        ReturnToPool();
+        BulletPool.Instance.Release(this);
         return;
       }
 
-      // Летим к цели
-      var dir = (target.position - transform.position).normalized;
+      Vector3 dir = (target.position - transform.position).normalized;
       var step = speed * Time.deltaTime;
 
-      if (Vector3.Distance(transform.position, target.position) <= step)
+      if ((target.position - transform.position).sqrMagnitude <= step * step)
       {
-        Hit();
+        if (target.TryGetComponent<Enemy>(out var enemy))
+          enemy.TakeDamage(damage);
+
+        BulletPool.Instance.Release(this);
         return;
       }
 
       transform.Translate(dir * step, Space.World);
     }
-
-    private void Hit()
-    {
-      if (target.TryGetComponent<Enemy>(out var enemy))
-        enemy.TakeDamage(damage);
-
-      ReturnToPool();
-    }
-
-    private void ReturnToPool()
-    {
-      // Сообщаем башне, что можем вернуться в пул
-      poolOwner?.ReturnToPool(this);
-    }
-
   }
 }

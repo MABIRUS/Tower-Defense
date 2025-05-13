@@ -3,39 +3,36 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer), typeof(EdgeCollider2D))]
 public class Rail : MonoBehaviour
 {
-  public Platform A, B;
-  public int cost;
-  public float costPerUnit = 1f;
+  public Platform firstPlatform;
+  public Platform secondPlatform;
 
   void Awake()
   {
     GetComponent<EdgeCollider2D>().isTrigger = true;
   }
 
-  public void Initialize(Platform a, Platform b)
+  public void Initialize(Platform firstPlatform, Platform secondPlatform)
   {
-    A = a; B = b;
-    A.AddRail(this);
-    B.AddRail(this);
+    this.firstPlatform = firstPlatform; this.secondPlatform = secondPlatform;
+    this.firstPlatform.AddRail(this);
+    this.secondPlatform.AddRail(this);
 
-    var lr = GetComponent<LineRenderer>();
-    lr.positionCount = 2;
-    lr.SetPosition(0, A.transform.position);
-    lr.SetPosition(1, B.transform.position);
+    var lineRenderer = GetComponent<LineRenderer>();
+    lineRenderer.positionCount = 2;
+    lineRenderer.SetPosition(0, this.firstPlatform.transform.position);
+    lineRenderer.SetPosition(1, this.secondPlatform.transform.position);
 
-    var ec = GetComponent<EdgeCollider2D>();
-    ec.points = new Vector2[]{
-            A.transform.position, B.transform.position
-        };
-
-    var dist = Vector3.Distance(A.transform.position, B.transform.position);
-    cost = Mathf.Max(1, Mathf.RoundToInt(dist * costPerUnit));
+    var edgeCollider = GetComponent<EdgeCollider2D>();
+    edgeCollider.points = new Vector2[]
+    {
+      this.firstPlatform.transform.position, this.secondPlatform.transform.position
+    };
   }
 
   void OnDestroy()
   {
-    if (A) A.RemoveRail(this);
-    if (B) B.RemoveRail(this);
+    if (firstPlatform) firstPlatform.RemoveRail(this);
+    if (secondPlatform) secondPlatform.RemoveRail(this);
   }
 }
 

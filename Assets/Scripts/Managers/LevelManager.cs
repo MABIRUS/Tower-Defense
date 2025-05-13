@@ -3,17 +3,17 @@ using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
+  public static LevelManager Instance { get; private set; }
+  public PlayerBase playerBase;
+
+  [Header("UI")]
   [SerializeField] private Text healthText;
   [SerializeField] private Text moneyText;
 
-  public static LevelManager main;
-
-  public PlayerBase playerBase;
-  
 
   private void Awake()
   {
-    main = this;
+    Instance = this;
     healthText.text = playerBase.Health.ToString();
     moneyText.text = playerBase.Money.ToString();
   }

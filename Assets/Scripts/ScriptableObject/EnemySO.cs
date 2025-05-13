@@ -4,12 +4,14 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemySO", menuName = "Scriptable Objects/EnemySO")]
 public class EnemySO : ScriptableObject
 {
-  [SerializeField] public float health;
-  [SerializeField] public float armor;
-  [SerializeField] public float speed;
-  [SerializeField] public float attackRange;
-  [SerializeField] public float attackSpeed;
-  [SerializeField] public float damage;
-  [SerializeField] public EnemyType enemyType;
-  [SerializeField] public int reward;
+  public float health;
+  public float armor;
+  public float speed;
+  public float attackRange;
+  public float attackSpeed;
+  public float damage;
+  public EnemyType enemyType;
+  public int reward;
+  public int packSize;
+  public int packDifficulty;
 }

@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 100
   armor: 10
-  speed: 1.5
+  speed: 1
   attackRange: 1
   attackSpeed: 1
   damage: 5
   enemyType: 0
-  reward: 15
+  reward: 10
+  packSize: 1
+  packDifficulty: 1

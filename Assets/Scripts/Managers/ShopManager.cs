@@ -8,30 +8,31 @@ namespace Assets.Scripts.Managers
 {
   public class ShopManager : MonoBehaviour
   {
+    public static ShopManager Instance { get; private set; }
+
     public PlayerBase playerBase;
     public List<ShopItemSO> shopItems;
     public GameObject shopButtonPrefab;
     public Transform buttonContainer;
 
-    List<ShopItemInfo> infos = new List<ShopItemInfo>();
+    List<ShopItemInfo> infos = new();
     Camera cam;
-
     void Start()
     {
+      Instance = this;
+
       cam = Camera.main;
 
       foreach (var item in shopItems)
       {
-        var go = Instantiate(shopButtonPrefab, buttonContainer);
-        var btn = go.GetComponent<Button>();
-        var txt = go.GetComponentInChildren<TMP_Text>();
-        var icon = go.transform.Find("Icon")?.GetComponent<Image>();
+        var GO = Instantiate(shopButtonPrefab, buttonContainer);
+        var btn = GO.GetComponent<Button>();
+        var txt = GO.GetComponentInChildren<TMP_Text>();
+        var icon = GO.transform.Find("Icon").GetComponent<Image>();
 
-        // Устанавливаем иконку из ShopItemSO
         if (icon != null && item.icon != null)
           icon.sprite = item.icon;
 
-        // Текст цены
         if (txt != null)
           txt.text = $"{item.price}";
 
@@ -46,11 +47,11 @@ namespace Assets.Scripts.Managers
 
     void UpdateButtons(float money)
     {
-      foreach (var f in infos)
+      foreach (var info in infos)
       {
-        bool ok = money >= f.item.price;
-        f.btn.interactable = ok;
-        f.txt.color = ok ? Color.white : Color.red;
+        var ok = money >= info.item.price;
+        info.btn.interactable = ok;
+        info.txt.color = ok ? Color.white : Color.red;
       }
     }
   }

@@ -4,14 +4,11 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Collider2D))]
 public class Platform : MonoBehaviour
 {
-  public int cost;
-  [HideInInspector] public Tower OccupiedTower;
-  public bool HasTower => OccupiedTower != null;
-  public List<Rail> connectedRails = new List<Rail>();
-
-  [Header("Highlight")]
-  [Tooltip("Child-объект с кольцом")]
   [SerializeField] private GameObject highlightCircle;
+
+  public Tower OccupiedTower;
+
+  public List<Rail> connectedRails = new();
 
   void Awake()
   {
@@ -19,21 +16,21 @@ public class Platform : MonoBehaviour
     col.isTrigger = false;
   }
 
-  public void AddRail(Rail r) 
+  public void AddRail(Rail rail) 
   { 
-    if (!connectedRails.Contains(r))
-      connectedRails.Add(r); 
+    if (!connectedRails.Contains(rail))
+      connectedRails.Add(rail); 
   }
-  public void RemoveRail(Rail r) 
+  public void RemoveRail(Rail rail) 
   { 
-    connectedRails.Remove(r); 
+    connectedRails.Remove(rail); 
   }
 
-  // ¬ключить/выключить ободок
   public void ShowHighlight(bool show)
   {
     if (highlightCircle != null)
       highlightCircle.SetActive(show);
   }
+  public bool HasTower => OccupiedTower != null;
 }
 

@@ -6,7 +6,13 @@ public class PlayerBase : MonoBehaviour, IDestroyable
 {
 
   [SerializeField] private float money;
-  private float health = 100;
+  [SerializeField] private float health;
+
+  [SerializeField] private SpriteRenderer SpriteRenderer;
+  [SerializeField] private Sprite FullBase;
+  [SerializeField] private Sprite DestroyedBase;
+
+  private bool destroyed = false;
 
   public event Action<float> OnHealthChanged;
   public event Action<float> OnMoneyChanged;
@@ -14,8 +20,15 @@ public class PlayerBase : MonoBehaviour, IDestroyable
   public float Money => money;
   public float Health => health;
 
+  private void Start()
+  {
+    SpriteRenderer.sprite = FullBase;
+  }
+
   public void TakeDamage(float damage)
   {
+    if(destroyed) return;
+
     health -= damage;
 
     OnHealthChanged?.Invoke(health);
@@ -34,7 +47,7 @@ public class PlayerBase : MonoBehaviour, IDestroyable
 
   public void Die()
   {
-    Debug.Log("Base Destoryer");
-    Destroy(gameObject);
+    SpriteRenderer.sprite = DestroyedBase;
+    destroyed = true;
   }
 }

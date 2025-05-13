@@ -1,23 +1,23 @@
-using System;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer), typeof(Collider2D))]
 public class TowerPreview : MonoBehaviour
 {
-  [Tooltip("Слой Platforms")]
   public LayerMask platformLayer;
 
-  private SpriteRenderer sr;
+  private SpriteRenderer spriteRenderer;
   public bool CanPlace { get; private set; }
 
   void Awake()
   {
-    sr = GetComponent<SpriteRenderer>();
-    var rb = GetComponent<Rigidbody2D>();
-    rb.bodyType = RigidbodyType2D.Kinematic;
-    rb.gravityScale = 0;
-    var col = GetComponent<Collider2D>();
-    col.isTrigger = true;
+    spriteRenderer = GetComponent<SpriteRenderer>();
+
+    var rigidbody = GetComponent<Rigidbody2D>();
+    rigidbody.bodyType = RigidbodyType2D.Kinematic;
+    rigidbody.gravityScale = 0;
+
+    var collider = GetComponent<Collider2D>();
+    collider.isTrigger = true;
 
     CanPlace = false;
     UpdateColor();
@@ -44,7 +44,7 @@ public class TowerPreview : MonoBehaviour
 
   void UpdateColor()
   {
-    sr.color = CanPlace
+    spriteRenderer.color = CanPlace
         ? new Color(0f, 1f, 0f, 0.5f)
         : new Color(1f, 0f, 0f, 0.5f);
   }

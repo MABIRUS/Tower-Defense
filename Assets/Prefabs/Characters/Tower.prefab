@@ -29,8 +29,8 @@ Transform:
   m_GameObject: {fileID: 3016844173472252091}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.17, y: -0.09, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: -2060152613
   m_SortingLayer: 4
   m_SortingOrder: 0
-  m_Sprite: {fileID: 2323917800338813707, guid: 6b9506d7b1314c647a2f73bcf4d46a6e, type: 3}
+  m_Sprite: {fileID: 2183332059371856055, guid: 3948b314b385b954a8bb6eeab54255fd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -125,7 +125,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 2.5599997
+  m_Radius: 1.5
 --- !u!50 &4568341258220324340
 Rigidbody2D:
   serializedVersion: 5
@@ -166,5 +166,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   towerScriptableObject: {fileID: 11400000, guid: b0ef5f64d67e82d408c88c42a093d7ce, type: 2}
-  bulletPrefab: {fileID: 6621702760768983483, guid: e0e9fefd77cb4fd419a0e995624c3af6, type: 3}
-  poolSize: 5

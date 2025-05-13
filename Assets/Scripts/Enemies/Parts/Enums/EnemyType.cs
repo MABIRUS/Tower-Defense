@@ -5,8 +5,6 @@
     Training,
     Basic,
     Swarm,
-    Flying,
-    Armored,
-    Shooting
+    Armored
   }
 }

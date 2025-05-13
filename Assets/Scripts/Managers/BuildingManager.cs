@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BuildingManager : MonoBehaviour
 {
-  public static BuildingManager Instance;
+  public static BuildingManager Instance { get; private set; }
   public PlayerBase playerBase;
   public LayerMask platformLayer;
   public float snapDistance = 1f;
@@ -23,9 +23,7 @@ public class BuildingManager : MonoBehaviour
     switch (current.buildType)
     {
       case BuildType.Tower:
-        // свободно за курсором
         previewGO.transform.position = pos;
-        // «магнит» к платформе
         var np = FindNearestPlatform(pos);
         if (np != null &&
             Vector2.Distance(pos, np.transform.position) < snapDistance)
@@ -36,11 +34,11 @@ public class BuildingManager : MonoBehaviour
 
       case BuildType.Platform:
         previewGO.transform.position = pos;
-        var nn = FindNearestPlatform(pos);
-        if (nn != null &&
-            Vector2.Distance(pos, nn.transform.position) < snapDistance)
+        var nP = FindNearestPlatform(pos);
+        if (nP != null &&
+            Vector2.Distance(pos, nP.transform.position) < snapDistance)
         {
-          previewGO.transform.position = nn.transform.position;
+          previewGO.transform.position = nP.transform.position;
         }
         break;
 
@@ -49,21 +47,20 @@ public class BuildingManager : MonoBehaviour
         {
           if (Input.GetMouseButtonDown(0))
           {
-            var p = FindNearestPlatform(pos);
-            if (p != null) railStart = p;
+            var platform1 = FindNearestPlatform(pos);
+            if (platform1 != null) railStart = platform1;
           }
         }
         else
         {
-          var p2 = FindNearestPlatform(pos);
+          var platform2 = FindNearestPlatform(pos);
           var a = railStart;
-          var b = p2 ?? railStart;
+          var b = platform2 != null ? platform2 : railStart;
           previewGO.GetComponent<Rail>().Initialize(a, b);
         }
         break;
     }
 
-    // Построить по ЛКМ
     if (Input.GetMouseButtonDown(0))
     {
       if (playerBase.Money >= current.price)
@@ -76,7 +73,6 @@ public class BuildingManager : MonoBehaviour
               var tower = Instantiate(current.buildPrefab, previewGO.transform.position, Quaternion.identity)
                 .GetComponent<Tower>();
               playerBase.ChangeMoney(-current.price);
-              // «занять» платформу и дать башне ссылку
               var plat = FindNearestPlatform(previewGO.transform.position);
               if (plat != null)
               {
@@ -97,7 +93,7 @@ public class BuildingManager : MonoBehaviour
             var r = previewGO.GetComponent<Rail>();
             Instantiate(current.buildPrefab)
                 .GetComponent<Rail>()
-                .Initialize(r.A, r.B);
+                .Initialize(r.firstPlatform, r.secondPlatform);
             playerBase.ChangeMoney(-current.price);
             break;
         }
@@ -105,7 +101,6 @@ public class BuildingManager : MonoBehaviour
       EndPlacement();
     }
 
-    // Отмена по ПКМ или Esc
     if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
       EndPlacement();
   }
@@ -132,14 +127,14 @@ public class BuildingManager : MonoBehaviour
   Platform FindNearestPlatform(Vector2 pos)
   {
     Platform best = null;
-    float md = snapDistance;
-    foreach (var p in Object.FindObjectsByType<Platform>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+    var md = snapDistance;
+    foreach (var platform in Object.FindObjectsByType<Platform>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
     {
-      float d = Vector2.Distance(pos, p.transform.position);
-      if (d < md)
+      var distance = Vector2.Distance(pos, platform.transform.position);
+      if (distance < md)
       {
-        md = d;
-        best = p;
+        md = distance;
+        best = platform;
       }
     }
     return best;
